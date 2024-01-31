@@ -8,7 +8,7 @@ import fs from "fs";
 
 import UserModel from "../models/UserModel";
 import TokenBlackList from "../models/tokenBlackList";
-import upload from "../middlewares/multerMiddleware";
+// import upload from "../middlewares/multerMiddleware";
 import { IGetUserAuthInfoRequest } from "../middlewares/definitionfile";
 
 const saltRounds = 10;
