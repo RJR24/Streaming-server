@@ -26,10 +26,9 @@ const registerSchema = joi_1.default.object({
     name: joi_1.default.string().required(),
     email: joi_1.default.string().email().required(),
     password: joi_1.default.string()
-        .min(8)
+        .min(4)
         .required()
-        .pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-={}[]|;:"<>,.?/~`])'))
-        .message("Password must be at least 8 characters long and include at least one letter, one number, and one special character."),
+        .message("Password must be at least 4 characters long."),
     terms: joi_1.default.boolean().valid(true).required(),
 });
 // Validation schema for user login
