@@ -19,10 +19,15 @@ const registerSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string()
-    .min(4)
+    .min(8)
     .required()
+    .pattern(
+      new RegExp(
+        '^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-={}[]|;:"<>,.?/~`])'
+      )
+    )
     .message(
-      "Password must be at least 4 characters long."
+      "Password must be at least 8 characters long and include at least one letter, one number, and one special character."
     ),
   terms: Joi.boolean().valid(true).required(),
 });
