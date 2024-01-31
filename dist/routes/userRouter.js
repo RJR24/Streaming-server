@@ -23,5 +23,7 @@ userRouter.get("/api/usersList", auth_1.isLoggedIn, auth_1.isAdmin, userControll
 userRouter.post("/api/suspendUser/:userId", userController_1.suspendUser);
 // Reactivate user
 userRouter.post("/api/reactivateUser/:userId", userController_1.reactivateUser);
+// Route to handle file upload
+userRouter.post("/api/users/:userId/upload-profile-picture", auth_1.isLoggedIn, userController_1.uploadProfilePictureHandler);
 exports.default = userRouter;
 //# sourceMappingURL=userRouter.js.map
