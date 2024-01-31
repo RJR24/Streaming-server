@@ -19,15 +19,10 @@ const registerSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string()
-    .min(8)
+    .min(4)
     .required()
-    .pattern(
-      new RegExp(
-        '^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-={}[]|;:"<>,.?/~`])'
-      )
-    )
     .message(
-      "Password must be at least 8 characters long and include at least one letter, one number, and one special character."
+      "Password must be at least 4 characters long."
     ),
   terms: Joi.boolean().valid(true).required(),
 });
@@ -46,12 +41,6 @@ const updateUserProfileSchema = Joi.object({
   address: Joi.string().allow(null, "").optional(),
 });
 
-// Define Joi schema for updateProfilePicture endpoint
-const uploadProfilePictureSchema = Joi.object({
-  file: Joi.object({
-    path: Joi.string().required(),
-  }).required(),
-});
 
 ///////////////////////////////
 
@@ -140,7 +129,7 @@ const loginUser = async (req: Request, res: Response) => {
     };
 
     const token = jwt.sign(tokenPayload, jwtSecret, {
-      expiresIn: "1h", // Token expiration time
+      expiresIn: "2h", // Token expiration time
     });
 
     return res.status(200).json({
@@ -279,59 +268,6 @@ const updateUserProfile = async (
   }
 };
 
-const uploadProfilePictureHandler = async (
-  req: Request,
-  res: Response
-): Promise<Response<any, Record<string, any>>> => {
-  try {
-    console.log("Request received:", req.params);
-
-    // Wrap the multer middleware in a Promise to make it awaitable
-    const multerMiddleware = () =>
-      new Promise<void>((resolve, reject) => {
-        upload(req, res, (err) => {
-          if (err) {
-            console.error("Error uploading file:", err);
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
-
-    // Wait for the multer middleware to complete
-    await multerMiddleware();
-
-    const userId = req.params.userId;
-    const file = req.file;
-
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
-      { avatar: file.path },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Send the response here, after handling the file upload
-    return res.status(200).json({
-      message: "Profile picture uploaded successfully",
-      user: updatedUser,
-    });
-  } catch (error) {
-    console.error("Error uploading profile picture:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      message: (error as Error).message,
-    });
-  }
-};
 
 const addToMyList = async (req: IGetUserAuthInfoRequest, res: Response) => {
   const { movieId } = req.params;
@@ -539,7 +475,6 @@ export {
   getMyListMovieDetails,
   userMoviesList,
   getUsersList,
-  uploadProfilePictureHandler,
   suspendUser,
   reactivateUser,
 };

@@ -8,7 +8,6 @@ import {
   getMyListMovieDetails,
   userMoviesList,
   getUsersList,
-  uploadProfilePictureHandler,
   suspendUser,
   reactivateUser,
 } from "../controllers/userController";
@@ -43,12 +42,5 @@ userRouter.get("/api/usersList", isLoggedIn, isAdmin, getUsersList);
 userRouter.post("/api/suspendUser/:userId", suspendUser);
 // Reactivate user
 userRouter.post("/api/reactivateUser/:userId", reactivateUser);
-
-// Route to handle file upload
-userRouter.post(
-  "/api/users/:userId/upload-profile-picture",
-  isLoggedIn,
-  uploadProfilePictureHandler
-);
 
 export default userRouter;

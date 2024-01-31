@@ -12,13 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reactivateUser = exports.suspendUser = exports.uploadProfilePictureHandler = exports.getUsersList = exports.userMoviesList = exports.getMyListMovieDetails = exports.addToMyList = exports.removeFromMyList = exports.logoutUser = exports.getUserProfile = exports.updateUserProfile = exports.loginUser = exports.registerUser = void 0;
+exports.reactivateUser = exports.suspendUser = exports.getUsersList = exports.userMoviesList = exports.getMyListMovieDetails = exports.addToMyList = exports.removeFromMyList = exports.logoutUser = exports.getUserProfile = exports.updateUserProfile = exports.loginUser = exports.registerUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const joi_1 = __importDefault(require("joi"));
 const UserModel_1 = __importDefault(require("../models/UserModel"));
 const tokenBlackList_1 = __importDefault(require("../models/tokenBlackList"));
-const multerMiddleware_1 = __importDefault(require("../middlewares/multerMiddleware"));
 const saltRounds = 10;
 const jwtSecret = process.env.JWT_SECRET;
 // Validation schema for user registration
@@ -26,10 +25,9 @@ const registerSchema = joi_1.default.object({
     name: joi_1.default.string().required(),
     email: joi_1.default.string().email().required(),
     password: joi_1.default.string()
-        .min(8)
+        .min(4)
         .required()
-        .pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-={}[]|;:"<>,.?/~`])'))
-        .message("Password must be at least 8 characters long and include at least one letter, one number, and one special character."),
+        .message("Password must be at least 4 characters long."),
     terms: joi_1.default.boolean().valid(true).required(),
 });
 // Validation schema for user login
@@ -43,12 +41,6 @@ const updateUserProfileSchema = joi_1.default.object({
     phoneNumber: joi_1.default.string().allow(null, "").optional(), // Optional, can be null or empty
     dateOfBirth: joi_1.default.date().iso().optional(), // Optional date in ISO format
     address: joi_1.default.string().allow(null, "").optional(),
-});
-// Define Joi schema for updateProfilePicture endpoint
-const uploadProfilePictureSchema = joi_1.default.object({
-    file: joi_1.default.object({
-        path: joi_1.default.string().required(),
-    }).required(),
 });
 ///////////////////////////////
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -123,7 +115,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             isAdmin: user.isAdmin,
         };
         const token = jsonwebtoken_1.default.sign(tokenPayload, jwtSecret, {
-            expiresIn: "1h", // Token expiration time
+            expiresIn: "2h", // Token expiration time
         });
         return res.status(200).json({
             message: "Login successful!",
@@ -240,47 +232,6 @@ const updateUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.updateUserProfile = updateUserProfile;
-const uploadProfilePictureHandler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log("Request received:", req.params);
-        // Wrap the multer middleware in a Promise to make it awaitable
-        const multerMiddleware = () => new Promise((resolve, reject) => {
-            (0, multerMiddleware_1.default)(req, res, (err) => {
-                if (err) {
-                    console.error("Error uploading file:", err);
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
-            });
-        });
-        // Wait for the multer middleware to complete
-        yield multerMiddleware();
-        const userId = req.params.userId;
-        const file = req.file;
-        if (!file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
-        const updatedUser = yield UserModel_1.default.findByIdAndUpdate(userId, { avatar: file.path }, { new: true });
-        if (!updatedUser) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        // Send the response here, after handling the file upload
-        return res.status(200).json({
-            message: "Profile picture uploaded successfully",
-            user: updatedUser,
-        });
-    }
-    catch (error) {
-        console.error("Error uploading profile picture:", error);
-        return res.status(500).json({
-            error: "Internal server error",
-            message: error.message,
-        });
-    }
-});
-exports.uploadProfilePictureHandler = uploadProfilePictureHandler;
 const addToMyList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { movieId } = req.params;
     const userId = req.user._id; // user information stored in req.user
