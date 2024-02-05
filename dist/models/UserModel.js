@@ -24,7 +24,7 @@ const userSchema = new mongoose_1.Schema({
     },
     isAdmin: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     myList: [
         {
