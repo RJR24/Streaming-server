@@ -44,7 +44,7 @@ const userSchema = new Schema<IUser>(
     },
     isAdmin: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     myList: [
       {
